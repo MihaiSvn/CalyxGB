@@ -1,0 +1,10 @@
+# Hardware ignores
+
+#build directories
+hardware/build/
+
+#compiled binaries and object files
+hardware/test_buttons
+*.o
+*.a
+*.so
