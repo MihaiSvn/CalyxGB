@@ -49,8 +49,8 @@ int main(void){
         {PIN_BTN_A, "A",1},
         {PIN_BTN_B, "B",1},
         {PIN_BTN_START, "START",1},
-        {PIN_BTN_SELECT, "SELECT",1},
-        {PIN_BTN_POWER, "POWER",1}
+        {PIN_BTN_SELECT, "SELECT",1}
+        // {PIN_BTN_POWER, "POWER",1}  da eroare daca nu e comentat, prin dtoverlay=gpio-shutdown kernel-ul placutei il ia si se ocupa de el
     };
 
     int num_buttons = sizeof(buttons)/sizeof(buttons[0]);

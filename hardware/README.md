@@ -71,6 +71,15 @@ To enable turning the Raspberry Pi on and off using a physical button connected 
 
 *Note: The hardware pinout documented here must always stay synchronized with the macro definitions in `include/console_config.h`.*
 
+## Building and Running the Code
+
+Once the setup is complete, navigate into the `hardware` directory, build the project using CMake, and run the test binary:
+
+```bash
+cd hardware
+make
+./build/test_buttons
+```
 
 ## Visual Reference
 
