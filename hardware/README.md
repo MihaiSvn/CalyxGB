@@ -4,6 +4,42 @@ This directory contains the physical pin configurations, C drivers, and Fritzing
 
 The hardware architecture is designed specifically for the **Raspberry Pi 3 Model A+**, utilizing its 40-pin GPIO header.
 
+## Prerequisites & Setup (Linux / Raspberry Pi OS)
+
+Before compiling or running the hardware code, ensure you have installed the required system tools and the `lgpio` library.
+
+### 1. Update system packages
+```bash
+sudo apt update
+```
+
+### 2. Install Build Tools and CMake
+```bash
+sudo apt install build-essential cmake -y
+```
+
+### 3. Install the lgpio library
+```bash
+sudo apt install liblgpio-dev -y
+```
+
+### 4. Enable Hardware Power/Wake Button (GPIO 3)
+To enable turning the Raspberry Pi on and off using a physical button connected to GPIO 3 (Pin 5) and GND, configure the system overlay:
+
+1. Open the system configuration file:
+   ```bash
+   sudo nano /boot/firmware/config.txt
+   ```
+2. Add the following line at the very end of the file:
+    ```text
+    dtoverlay=gpio-shutdown
+    ```
+3. Save and exit (`Ctrl + O`, then `Enter`, then `Ctrl + X`).
+
+4. Reboot the system to apply the changes:
+   ```bash
+   sudo reboot
+   ```
 **Components**
 
 * **4-Pin Tactile Buttons (Input)**

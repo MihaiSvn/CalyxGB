@@ -22,6 +22,7 @@ void sigint_handler(int signum) {
 typedef struct {
     int pin;
     const char *name;
+    int last_state;
 } ButtonDef;
 //error codes definitions:
 
@@ -39,16 +40,17 @@ int main(void){
         handle_error(-1, "Couldn't access board's chip",1);
     }
 
+    //toate butoanele sunt neapasate la inceput
     ButtonDef buttons [] = {
-        {PIN_BTN_UP, "UP"},
-        {PIN_BTN_DOWN, "DOWN"},
-        {PIN_BTN_LEFT, "LEFT"},
-        {PIN_BTN_RIGHT, "RIGHT"},
-        {PIN_BTN_A, "A"},
-        {PIN_BTN_B, "B"},
-        {PIN_BTN_START, "START"},
-        {PIN_BTN_SELECT, "SELECT"},
-        {PIN_BTN_POWER, "POWER"}
+        {PIN_BTN_UP, "UP",1},
+        {PIN_BTN_DOWN, "DOWN",1},
+        {PIN_BTN_LEFT, "LEFT",1},
+        {PIN_BTN_RIGHT, "RIGHT",1},
+        {PIN_BTN_A, "A",1},
+        {PIN_BTN_B, "B",1},
+        {PIN_BTN_START, "START",1},
+        {PIN_BTN_SELECT, "SELECT",1},
+        {PIN_BTN_POWER, "POWER",1}
     };
 
     int num_buttons = sizeof(buttons)/sizeof(buttons[0]);
@@ -63,14 +65,21 @@ int main(void){
 
     while(keep_running){
         for(int i=0;i<num_buttons;i++){
-            if(lgGpioRead(handle,buttons[i].pin) == 0){
-                printf(">> Button pressed: %s\n",buttons[i].name);
-                break;
+            int current_state = lgGpioRead(handle,buttons[i].pin);
+
+
+            if(current_state==0 && buttons[i].last_state==1){
+                printf(">> Button PRESSED: %s\n",buttons[i].name);
+            } else if(current_state == 1 && buttons[i].last_state == 0){
+                printf(">> Button RELEASED: %s\n", buttons[i].name);
             }
+
+            buttons[i].last_state = current_state;
         }
 
-        usleep(100000);
+        usleep(20000);
     }
+
     printf("\nExiting and cleaning up GPIO...\n");
     lgGpiochipClose(handle);
     return 0;
