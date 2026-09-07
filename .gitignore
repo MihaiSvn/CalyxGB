@@ -18,3 +18,7 @@ hardware/read_btn_input
 hardware/boilerplates/ipc_fifo/read_fifo
 hardware/boilerplates/ipc_fifo/write_fifo
 hardware/boilerplates/ipc_fifo/fifo
+
+hardware/boilerplates/gpio_hardware/led_blink
+hardware/boilerplates/gpio_hardware/button_poll
+
