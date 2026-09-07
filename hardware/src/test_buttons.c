@@ -33,6 +33,7 @@ typedef struct {
 
 // 1 - error at accessing board chip
 // 2 - error at accessing button pin
+// 3 - error at reading/writing fifo
 int main(void){
 
     signal(SIGINT, sigint_handler);
@@ -54,7 +55,7 @@ int main(void){
         {PIN_BTN_A, "A",1,'A'},
         {PIN_BTN_B, "B",1,'B'},
         {PIN_BTN_START, "START",1,'S'},
-        {PIN_BTN_SELECT, "SELECT",1,'s'}
+        {PIN_BTN_SELECT, "SELECT",1,'E'} //sElect, ca lowercase sa fie cand isi ia release
         // {PIN_BTN_POWER, "POWER",1}  da eroare daca nu e comentat, prin dtoverlay=gpio-shutdown kernel-ul placutei il ia si se ocupa de el
     };
 
@@ -85,14 +86,18 @@ int main(void){
 
 
             if(current_state==0 && buttons[i].last_state==1){
-                printf("HARDWARE DETECT >> Button PRESSED: %s\n",buttons[i].name);
-                fflush(stdout);
+                // printf("HARDWARE DETECT >> Button PRESSED: %s\n",buttons[i].name);
+                // fflush(stdout);
 
                 if(write(fifo_fd,&buttons[i].protocol_codename,1)<0){
                     handle_error(-1,"couldn't send button press to FIFO",3);
                 }
             } else if(current_state == 1 && buttons[i].last_state == 0){
                 //printf(">> Button RELEASED: %s\n", buttons[i].name);
+                const char lowercase = buttons[i].protocol_codename-'A'+'a';
+                if(write(fifo_fd,&lowercase,1)<0){
+                    handle_error(-1,"couldn't send button release to FIFO",3);
+                }
             }
 
             buttons[i].last_state = current_state;

@@ -17,8 +17,15 @@ int main(){
     char ch;
     while( read(fd,&ch,1)!=0){
         if (ch != '\n') {
-            printf("Button pressed: >> %c\n",ch);
-            fflush(stdout);
+            if (ch>='A' && ch<='Z'){
+                printf("Button pressed: >> %c\n",ch);
+                fflush(stdout);
+            }
+            else if (ch>='a' && ch<='z'){
+                printf("Button released: >> %c\n",ch);
+                fflush(stdout);
+            }
+            
         }
     }
     close(fd);
