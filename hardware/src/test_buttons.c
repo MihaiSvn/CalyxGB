@@ -3,6 +3,10 @@
 #include <signal.h>
 #include <lgpio.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "console_config.h"
 
 void handle_error(int handle, const char *msg, int exit_code){
@@ -23,6 +27,7 @@ typedef struct {
     int pin;
     const char *name;
     int last_state;
+    const char protocol_codename; //for transmitting to fifo
 } ButtonDef;
 //error codes definitions:
 
@@ -42,14 +47,14 @@ int main(void){
 
     //toate butoanele sunt neapasate la inceput
     ButtonDef buttons [] = {
-        {PIN_BTN_UP, "UP",1},
-        {PIN_BTN_DOWN, "DOWN",1},
-        {PIN_BTN_LEFT, "LEFT",1},
-        {PIN_BTN_RIGHT, "RIGHT",1},
-        {PIN_BTN_A, "A",1},
-        {PIN_BTN_B, "B",1},
-        {PIN_BTN_START, "START",1},
-        {PIN_BTN_SELECT, "SELECT",1}
+        {PIN_BTN_UP, "UP",1,'U'},
+        {PIN_BTN_DOWN, "DOWN",1,'D'},
+        {PIN_BTN_LEFT, "LEFT",1,'L'},
+        {PIN_BTN_RIGHT, "RIGHT",1,'R'},
+        {PIN_BTN_A, "A",1,'A'},
+        {PIN_BTN_B, "B",1,'B'},
+        {PIN_BTN_START, "START",1,'S'},
+        {PIN_BTN_SELECT, "SELECT",1,'s'}
         // {PIN_BTN_POWER, "POWER",1}  da eroare daca nu e comentat, prin dtoverlay=gpio-shutdown kernel-ul placutei il ia si se ocupa de el
     };
 
@@ -62,16 +67,32 @@ int main(void){
             handle_error(handle, error_msg, 2);
         }
     }
+    int fifo_fd;
+    if(-1  ==  mkfifo("/tmp/btn_input_fifo",0600)){
+        if(errno==EEXIST){
+            //handle_error(handle,"FIFO for button input already exists",3);
+        } else {
+            handle_error(handle,"couldn't creating FIFO for button input",3);
+        }
+    }
 
+    if ( (fifo_fd=open("/tmp/btn_input_fifo",O_WRONLY))==-1){
+        handle_error(handle,"couldn't open FIFO for button input",3);
+    }
     while(keep_running){
         for(int i=0;i<num_buttons;i++){
             int current_state = lgGpioRead(handle,buttons[i].pin);
 
 
             if(current_state==0 && buttons[i].last_state==1){
-                printf(">> Button PRESSED: %s\n",buttons[i].name);
+                printf("HARDWARE DETECT >> Button PRESSED: %s\n",buttons[i].name);
+                fflush(stdout);
+
+                if(write(fifo_fd,&buttons[i].protocol_codename,1)<0){
+                    handle_error(-1,"couldn't send button press to FIFO",3);
+                }
             } else if(current_state == 1 && buttons[i].last_state == 0){
-                printf(">> Button RELEASED: %s\n", buttons[i].name);
+                //printf(">> Button RELEASED: %s\n", buttons[i].name);
             }
 
             buttons[i].last_state = current_state;
@@ -82,5 +103,7 @@ int main(void){
 
     printf("\nExiting and cleaning up GPIO...\n");
     lgGpiochipClose(handle);
+    close(fifo_fd);
+    unlink("/tmp/btn_input_fifo");
     return 0;
 }

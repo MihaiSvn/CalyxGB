@@ -1,3 +1,7 @@
+# IDE
+.vscode
+
+
 # Hardware ignores
 
 #build directories
@@ -5,6 +9,12 @@ hardware/build/
 
 #compiled binaries and object files
 hardware/test_buttons
+hardware/read_btn_input
 *.o
 *.a
 *.so
+
+#files from boilerplates
+hardware/boilerplates/ipc_fifo/read_fifo
+hardware/boilerplates/ipc_fifo/write_fifo
+hardware/boilerplates/ipc_fifo/fifo
